@@ -35,29 +35,6 @@ public class DigestUtils {
     private static final int STREAM_BUFFER_LENGTH = 1024;
 
     /**
-     * Read through an InputStream and returns the digest for the data
-     *
-     * @param digest
-     *            The MessageDigest to use (e.g. MD5)
-     * @param data
-     *            Data to digest
-     * @return MD5 digest
-     * @throws IOException
-     *             On error reading from the stream
-     */
-    private static byte[] digest(final MessageDigest digest, final InputStream data) throws IOException {
-        final byte[] buffer = new byte[STREAM_BUFFER_LENGTH];
-        int read = data.read(buffer, 0, STREAM_BUFFER_LENGTH);
-
-        while (read > -1) {
-            digest.update(buffer, 0, read);
-            read = data.read(buffer, 0, STREAM_BUFFER_LENGTH);
-        }
-
-        return digest.digest();
-    }
-
-    /**
      * Returns a <code>MessageDigest</code> for the given <code>algorithm</code>.
      *
      * @param algorithm
@@ -203,7 +180,7 @@ public class DigestUtils {
      * @since 1.7
      */
     public static byte[] md2(final InputStream data) throws IOException {
-        return digest(getMd2Digest(), data);
+        return updateDigest(getMd2Digest(), data).digest();
     }
 
     /**
@@ -278,7 +255,7 @@ public class DigestUtils {
      * @since 1.4
      */
     public static byte[] md5(final InputStream data) throws IOException {
-        return digest(getMd5Digest(), data);
+        return updateDigest(getMd5Digest(), data).digest();
     }
 
     /**
@@ -393,7 +370,7 @@ public class DigestUtils {
      * @since 1.7
      */
     public static byte[] sha1(final InputStream data) throws IOException {
-        return digest(getSha1Digest(), data);
+        return updateDigest(getSha1Digest(), data).digest();
     }
 
     /**
@@ -474,7 +451,7 @@ public class DigestUtils {
      * @since 1.4
      */
     public static byte[] sha256(final InputStream data) throws IOException {
-        return digest(getSha256Digest(), data);
+        return updateDigest(getSha256Digest(), data).digest();
     }
 
     /**
@@ -568,7 +545,7 @@ public class DigestUtils {
      * @since 1.4
      */
     public static byte[] sha384(final InputStream data) throws IOException {
-        return digest(getSha384Digest(), data);
+        return updateDigest(getSha384Digest(), data).digest();
     }
 
     /**
@@ -662,7 +639,7 @@ public class DigestUtils {
      * @since 1.4
      */
     public static byte[] sha512(final InputStream data) throws IOException {
-        return digest(getSha512Digest(), data);
+        return updateDigest(getSha512Digest(), data).digest();
     }
 
     /**
@@ -796,6 +773,32 @@ public class DigestUtils {
      */
     public static MessageDigest updateDigest(final MessageDigest messageDigest, final String valueToDigest) {
         messageDigest.update(StringUtils.getBytesUtf8(valueToDigest));
+        return messageDigest;
+    }
+
+    /**
+     * Reads through the given {@link InputStream} and updates the given
+     * {@link MessageDigest} with data read from the stream.
+     *
+     * @param messageDigest
+     *            the {@link MessageDigest} to update
+     * @param data
+     *            data to update the {@link MessageDigest} with
+     * @return the updated {@link MessageDigest}
+     * @throws IOException
+     *            on error reading from the stream
+     * @since 1.8
+     */
+    public static MessageDigest updateDigest(final MessageDigest messageDigest, final InputStream data)
+            throws IOException {
+        final byte[] buffer = new byte[STREAM_BUFFER_LENGTH];
+        int read = data.read(buffer, 0, STREAM_BUFFER_LENGTH);
+
+        while (read > -1) {
+            messageDigest.update(buffer, 0, read);
+            read = data.read(buffer, 0, STREAM_BUFFER_LENGTH);
+        }
+
         return messageDigest;
     }
 }
